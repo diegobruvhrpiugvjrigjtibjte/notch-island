@@ -1,0 +1,6 @@
+public/demo/
+public/img/
+public/face.css
+public/release.json
+node_modules/
+.wrangler/

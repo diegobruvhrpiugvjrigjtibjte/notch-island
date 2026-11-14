@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NotchIsland — a Dynamic Island for Windows with a face</title>
+<meta name="description" content="A Dynamic Island for Windows with a living face, a voice assistant powered by your own Claude Code login, and live links to VS Code and Chrome. Free and open source.">
+<meta property="og:title" content="NotchIsland — a Dynamic Island for Windows with a face">
+<meta property="og:description" content="Hover the pill. It listens, talks to Claude Code, and has 15 widgets. Free, open source.">
+<meta property="og:image" content="/img/music.png"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#070a14">
+<link rel="icon" href="/img/icon.png"><link rel="stylesheet" href="/face.css"><link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<div id="progress"></div><div id="glow"></div>
+
+<header id="nav">
+  <a class="brand" href="#top" aria-label="NotchIsland"><span class="bface" id="face-nav"></span><b>NotchIsland</b></a>
+  <nav>
+    <a href="#demo" data-i="nav.demo">Demo</a><a href="#face" data-i="nav.face">The face</a><a href="#claude" data-i="nav.claude">Claude Code</a><a href="#widgets" data-i="nav.widgets">Widgets</a><a href="#install" data-i="nav.install">Install</a><a href="#links" data-i="nav.links">Links</a>
+  </nav>
+  <div class="navr"><button id="lang" class="chipb" aria-label="Language">IT</button><a class="btn mini mag" href="#install" data-i="nav.get">Get it</a></div>
+</header>
+
+<main id="top">
+<!-- ============================================================ HERO -->
+<section id="hero">
+  <canvas id="aurora"></canvas>
+  <div class="stage" id="stage1"><iframe id="demo1" title="NotchIsland live demo" loading="eager"></iframe><div class="hint" id="hint1"><span data-i="hero.hint">Hover the pill — it is the real app</span><i></i></div></div>
+  <div class="hero-copy">
+    <p class="eyebrow rv" data-i="hero.eyebrow">For Windows 10 · 11 · free &amp; open source</p>
+    <h1 class="rv" id="h1" data-i-html="hero.title">Your screen just <em>grew a face.</em></h1>
+    <p class="lead rv" data-i="hero.lead">A Dynamic Island that listens, reacts and talks to Claude Code. Hover it, talk to it, make it yours.</p>
+    <div class="cta rv">
+      <a class="btn big mag" href="#install" id="cta-main"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M3 5.5 10.5 4.4v7H3zm8.5-1.2L21 3v8.4h-9.5zM3 12.6h7.5v7L3 18.5zm8.5 0H21V21l-9.5-1.3z"/></svg><span data-i="hero.cta">Install for Windows</span></a>
+      <a class="btn ghost big mag" href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.38 7.86 10.9.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.53-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56C20.21 21.38 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg><span>GitHub</span></a>
+    </div>
+    <div class="sims rv"><span data-i="hero.try">Make it react:</span>
+      <button data-sim="play" data-i="sim.play">Play / pause</button><button data-sim="claude" data-i="sim.claude">Claude starts working</button><button data-sim="reminder" data-i="sim.reminder">Reminder</button><button data-sim="timer" data-i="sim.timer">12 s timer</button>
+    </div>
+  </div>
+  <div class="scroll-hint"><span></span></div>
+</section>
+
+<div class="marquee" aria-hidden="true"><div class="track" id="marquee"></div></div>
+
+<!-- ============================================================ DEMO sticky -->
+<section id="demo" class="pinwrap">
+  <div class="pin-left">
+    <p class="eyebrow rv" data-i="demo.eyebrow">The real thing, in your browser</p>
+    <h2 class="rv" data-i="demo.title">Everything on one little island.</h2>
+    <div class="steps" id="steps">
+      <article class="step on" data-tab="media"><h3 data-i="s.music.t">Music that just works</h3><p data-i="s.music.p">Cover art, synced lyrics, a seekable bar, play, pause, <b>skip</b>. From Spotify, your browser, anything.</p></article>
+      <article class="step" data-tab="assistant"><h3 data-i="s.ass.t">Say it, or type it</h3><p data-i="s.ass.p">“Timer 10 minutes.” “What is 15 times 7?” “Open the project in VS Code.” About 60 actions in English and Italian — try it right here.</p></article>
+      <article class="step" data-tab="claude"><h3 data-i="s.cl.t">Claude Code, live</h3><p data-i="s.cl.p">See every session work, wait and finish. Accept diffs. Drive VS Code and Chrome from the island.</p></article>
+      <article class="step" data-tab="widgets"><h3 data-i="s.w.t">15 widgets, yours to arrange</h3><p data-i="s.w.p">Weather, timer, tasks, notes, calendar, system monitor, calculator, converter and more. They really work.</p></article>
+      <article class="step" data-tab="set"><h3 data-i="s.set.t">Make it yours</h3><p data-i="s.set.p">Five themes, eight accents, notch or floating, every shortcut — and a screen picker for multi-monitor setups. Change the accent: the whole site follows.</p></article>
+    </div>
+  </div>
+  <div class="pin-right"><div class="stage" id="stage2"><iframe id="demo2" title="NotchIsland interactive demo" loading="lazy"></iframe></div>
+    <div class="swatches" id="swatches"></div></div>
+</section>
+
+<!-- ============================================================ FACE -->
+<section id="face" class="sect">
+  <div class="split">
+    <div class="facebox rv"><div id="bigface"></div><div class="moods" id="moods"></div></div>
+    <div>
+      <p class="eyebrow rv" data-i="face.eyebrow">It has a face</p>
+      <h2 class="rv" data-i="face.title">A tiny friend that follows your mouse.</h2>
+      <p class="rv big-p" data-i="face.p">Its eyes track your cursor, it blinks, bobs to the music, falls asleep when you leave, thinks while Claude works and lights up when Claude is waiting for you. Click it. Click it five times.</p>
+      <ul class="ticks rv"><li data-i="face.l1">Happy with music, sleepy when idle</li><li data-i="face.l2">Thinking while Claude works, alert when it needs you</li><li data-i="face.l3">Listening ring while you talk to it</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ TALK -->
+<section id="talk" class="sect dark">
+  <div class="split rev">
+    <div>
+      <p class="eyebrow rv" data-i="talk.eyebrow">Voice &amp; text</p>
+      <h2 class="rv" data-i="talk.title">Talk to your PC. Seriously.</h2>
+      <p class="rv big-p" data-i="talk.p">Press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd> and just say it. Speech recognition runs <b>on your PC</b> with whisper.cpp — your voice never leaves it. And when it does not know a command, it hands the job to a real <b>Claude Code</b> session.</p>
+      <div class="badges rv"><span data-i="talk.b1">60+ built-in actions</span><span data-i="talk.b2">EN · IT</span><span data-i="talk.b3">100% local speech</span></div>
+    </div>
+    <div class="chat rv" id="chat"><div class="wave" id="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="log" id="chatlog"></div></div>
+  </div>
+</section>
+
+<!-- ============================================================ CLAUDE -->
+<section id="claude" class="sect">
+  <p class="eyebrow center rv" data-i="cl.eyebrow">Claude Code integration</p>
+  <h2 class="center rv" data-i="cl.title">Your terminal talks to your island.</h2>
+  <div class="clgrid">
+    <div class="term rv"><div class="tbar"><i></i><i></i><i></i><span>claude — web-app</span></div><pre id="term"></pre></div>
+    <div class="clmid rv"><div class="minipill" id="minipill"><span id="mface"></span><b id="mtext">NotchIsland</b><em id="msub"></em></div><p data-i="cl.sync">The pill mirrors the session in real time.</p></div>
+    <div class="clfeat rv">
+      <div class="feat"><b data-i="cl.f1t">Agent mode, no API key</b><span data-i="cl.f1p">Anything the assistant doesn't know becomes a real Claude Code session on <i>your</i> login — no per-token billing.</span></div>
+      <div class="feat"><b data-i="cl.f2t">Live sessions &amp; alerts</b><span data-i="cl.f2p">Working, waiting for you, done — with a Windows notification when Claude needs you.</span></div>
+      <div class="feat"><b data-i="cl.f3t">Guard rails</b><span data-i="cl.f3p">Destructive commands are blocked, every step is shown live, and Stop is one click away.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ WIDGETS -->
+<section id="widgets" class="sect dark">
+  <p class="eyebrow center rv" data-i="w.eyebrow">15 widgets</p>
+  <h2 class="center rv" data-i="w.title">Little tools that don't get in the way.</h2>
+  <div class="wgrid" id="wgrid">
+    <div class="wc tilt rv"><h4 data-i="w.clock">Clock</h4><div class="bigt" id="wclock">--:--</div><small id="wdate"></small></div>
+    <div class="wc tilt rv"><h4 data-i="w.timer">Timer</h4><div class="bigt" id="wtimer">25:00</div><div class="row"><button id="wtgo" data-i="w.start">Start</button><button id="wtrs" class="g" data-i="w.reset">Reset</button></div></div>
+    <div class="wc tilt rv"><h4 data-i="w.dice">Dice</h4><div class="bigt" id="wdice">?</div><div class="row"><button data-d="6">D6</button><button data-d="20">D20</button><button data-d="100">D100</button></div></div>
+    <div class="wc tilt rv"><h4 data-i="w.todo">Tasks</h4><div id="wtodo"></div></div>
+    <div class="wc tilt rv"><h4 data-i="w.calc">Calculator</h4><div class="calc"><output id="wout">0</output><div id="wkeys"></div></div></div>
+    <div class="wc tilt rv"><h4 data-i="w.more">…and 9 more</h4><p class="more" data-i="w.morep">Weather with forecast, stopwatch, notes, reminders, calendar, system monitor, links, world clocks, unit converter, breathing.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ PRIVACY -->
+<section id="privacy" class="sect">
+  <p class="eyebrow center rv" data-i="p.eyebrow">Private by design</p>
+  <h2 class="center rv" data-i="p.title">Local first. Nothing to sign up for.</h2>
+  <div class="cards4">
+    <div class="card rv tilt"><h3 data-i="p.1t">Your voice stays home</h3><p data-i="p.1p">Whisper runs on your PC. The model is downloaded once and checked against a pinned SHA-256.</p></div>
+    <div class="card rv tilt"><h3 data-i="p.2t">No accounts, no telemetry</h3><p data-i="p.2p">Tasks, notes and settings live in your AppData folder. Nothing is uploaded.</p></div>
+    <div class="card rv tilt"><h3 data-i="p.3t">A hub on localhost only</h3><p data-i="p.3p">Claude Code, VS Code and Chrome talk to 127.0.0.1 with a secret token; web pages are rejected.</p></div>
+    <div class="card rv tilt"><h3 data-i="p.4t">Open source</h3><p data-i="p.4p">MIT-licensed. Read every line, run the tests, send a pull request.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ INSTALL -->
+<section id="install" class="sect install">
+  <div class="icard rv">
+    <img src="/img/icon.png" alt="" class="appicon">
+    <h2 data-i="i.title">Install NotchIsland</h2>
+    <p class="lead" data-i="i.lead">Free. About 80 MB. One click to a custom installer — no admin rights needed.</p>
+    <a class="btn huge mag" id="dl" href="/download" download><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 3v11.2l4.100-4.100 1.400 1.400L12 17 6.500 11.500l1.400-1.400L12 14.200V3zM5 19h14v2H5z"/></svg><span data-i="i.btn">Download for Windows</span></a>
+    <div class="meta" id="relmeta"></div>
+    <div class="steps3"><div><b>1</b><span data-i="i.s1">Run the installer</span></div><div><b>2</b><span data-i="i.s2">Choose your options</span></div><div><b>3</b><span data-i="i.s3">Hover the pill at the top</span></div></div>
+    <p class="note" data-i="i.note">Windows SmartScreen may warn you because the installer isn't code-signed yet — choose “More info → Run anyway”. You can verify the file with the SHA-256 below.</p>
+    <div class="hash"><code id="sha">sha256: …</code><button id="copysha" class="g" data-i="i.copy">Copy</button></div>
+    <p class="alt"><a href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island/releases" target="_blank" rel="noopener" data-i="i.gh">Also on GitHub Releases</a> · <a href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island#readme" target="_blank" rel="noopener" data-i="i.readme">Read the README</a></p>
+    <p class="note os" id="osnote" hidden data-i="i.os">NotchIsland is for Windows 10/11 only (for now).</p>
+  </div>
+  <div class="shots rv"><img src="/img/assistant.png" alt="Assistant tab" loading="lazy"><img src="/img/claude.png" alt="Claude tab" loading="lazy"><img src="/img/widgets.png" alt="Widgets" loading="lazy"></div>
+</section>
+
+<!-- ============================================================ LINKS -->
+<section id="links" class="sect dark">
+  <p class="eyebrow center rv" data-i="l.eyebrow">Links &amp; credits</p>
+  <h2 class="center rv" data-i="l.title">Everything in one place.</h2>
+  <div class="linkgrid">
+    <div class="lcol rv"><h4 data-i="l.proj">The project</h4>
+      <a href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island" target="_blank" rel="noopener">GitHub repository</a>
+      <a href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island/releases" target="_blank" rel="noopener">Releases &amp; downloads</a>
+      <a href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island#readme" target="_blank" rel="noopener">README (English)</a>
+      <a href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island/blob/main/README.it.md" target="_blank" rel="noopener">README (Italiano)</a>
+      <a href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island/issues" target="_blank" rel="noopener">Report an issue</a>
+      <a href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing &amp; translations</a>
+      <a href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island/blob/main/LICENSE" target="_blank" rel="noopener">MIT license</a>
+    </div>
+    <div class="lcol rv"><h4 data-i="l.int">Integrations</h4>
+      <a href="https://docs.claude.com/en/docs/claude-code/overview" target="_blank" rel="noopener">Claude Code</a>
+      <a href="https://code.visualstudio.com" target="_blank" rel="noopener">Visual Studio Code</a>
+      <a href="https://www.google.com/chrome/" target="_blank" rel="noopener">Google Chrome</a>
+      <a href="https://www.spotify.com" target="_blank" rel="noopener">Spotify</a>
+    </div>
+    <div class="lcol rv"><h4 data-i="l.built">Built with</h4>
+      <a href="https://www.electronjs.org" target="_blank" rel="noopener">Electron</a>
+      <a href="https://github.com/ggml-org/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a>
+      <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>
+      <a href="https://lrclib.net" target="_blank" rel="noopener">lrclib</a>
+      <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener">Cloudflare Workers</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ FAQ -->
+<section id="faq" class="sect">
+  <h2 class="center rv" data-i="f.title">Questions</h2>
+  <div class="faq">
+    <details class="rv"><summary data-i="f.q1">Does the agent need an API key or cost money?</summary><p data-i="f.a1">No. It runs the <code>claude</code> command line that comes with Claude Code, using the account you are already logged in with, so it counts against your Claude plan — no API key, no per-token billing.</p></details>
+    <details class="rv"><summary data-i="f.q2">Is my voice sent anywhere?</summary><p data-i="f.a2">No. Recognition runs locally with whisper.cpp. The program and model are downloaded once from GitHub / Hugging Face and verified.</p></details>
+    <details class="rv"><summary data-i="f.q3">Can it delete my files?</summary><p data-i="f.a3">Destructive commands (rm -rf, del /s, format, shutdown…) are blocked and Claude is told to ask before anything irreversible. You can also set it to “Read only” or turn it off.</p></details>
+    <details class="rv"><summary data-i="f.q4">I have two monitors. Which one shows the pill?</summary><p data-i="f.a4">Your choice: Settings → Appearance → Display lists every connected screen.</p></details>
+    <details class="rv"><summary data-i="f.q5">Why does Windows warn me about the installer?</summary><p data-i="f.a5">It isn't code-signed yet. The source is public and the SHA-256 is published here so you can verify the file.</p></details>
+    <details class="rv"><summary data-i="f.q6">What about macOS and Linux?</summary><p data-i="f.a6">Not yet — the system agents are PowerShell/WinRT. Contributions are welcome.</p></details>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="fl"><span class="bface" id="face-foot"></span><b>NotchIsland</b><span data-i="foot.t">Made with care. Open source under the MIT license.</span></div>
+  <div class="fr"><a href="https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island" target="_blank" rel="noopener">GitHub</a><a href="#install" data-i="nav.install">Install</a><a href="#top" data-i="foot.top">Back to top ↑</a></div>
+  <p class="legal" data-i="foot.legal">Independent project, not affiliated with or endorsed by Anthropic. “Claude” and “Claude Code” are trademarks of Anthropic.</p>
+</footer>
+<script type="module" src="/site.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ const { EventEmitter } = require('events');
 const WIDGET_IDS = ['clock', 'weather', 'timer', 'system', 'todo', 'notes', 'calendar', 'stopwatch', 'calc', 'reminders', 'links', 'world', 'convert', 'breathe', 'dice'];
 
 const DEFAULTS = {
-  lang: 'auto', autostart: true, theme: 'black', accent: '#8ab4ff', mode: 'floating', radius: 34, scale: 1, openOn: 'hover',
+  lang: 'auto', autostart: true, display: 'primary', theme: 'black', accent: '#8ab4ff', mode: 'floating', radius: 34, scale: 1, openOn: 'hover',
   face: { on: true, sleepy: true },
   compact: 'auto', clock24: true, seconds: false,
   tabsOff: [],

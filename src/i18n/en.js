@@ -64,7 +64,7 @@ export default {
     "Questo brano non permette di spostarsi": "This track does not allow seeking",
     "Timer finito": "Timer finished", "Pomodoro finito: pausa!": "Pomodoro done: take a break!", "Pausa finita": "Break over",
     // --- settings
-    "Aspetto": "Appearance", "Nero": "Black", "Grafite": "Graphite", "Mezzanotte": "Midnight", "Chiaro": "Light", "Automatico": "Automatic", "Colore": "Color", "Posizione": "Position", "Fluttuante": "Floating",
+    "Aspetto": "Appearance", "Nero": "Black", "Grafite": "Graphite", "Mezzanotte": "Midnight", "Chiaro": "Light", "Automatico": "Automatic", "Colore": "Color", "Posizione": "Position", "Schermo": "Display", "Principale": "Primary", "Un solo schermo collegato.": "Only one display connected.", "Fluttuante": "Floating",
     "Dimensione della pillola": "Pill size", "Piccola": "Small", "Media": "Medium", "Grande": "Large", "Arrotondamento": "Roundness", "Apertura": "Opening", "Al passaggio": "On hover", "Al clic": "On click",
     "Cambia la lingua dell'isola, dell'assistente e del riconoscimento vocale.": "Changes the language of the island, the assistant and speech recognition.",
     "Faccina": "Face", "Mostra la faccina": "Show the face", "Si addormenta se non la usi": "Falls asleep when idle",
@@ -81,6 +81,7 @@ export default {
     "Mostra / nascondi": "Show / hide", "Esci": "Quit", "File dal PC": "Files from the PC", "Nessun file": "No files",
   },
   patterns: [
+    ["^Schermo (\\d+) · (.+)$", "Display $1 · $2"],
     ["^(.+) GB liberi$", "$1 GB free"],
     ["^(\\d+) g (\\d+) h$", "$1 d $2 h"],
     ["^(\\d+) app$", "$1 apps"],

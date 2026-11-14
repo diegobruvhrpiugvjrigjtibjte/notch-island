@@ -7,3 +7,6 @@ integrations/chrome/key.json
 # local test output
 test/out/
 *.part
+site/public/demo/
+site/public/img/
+site/.wrangler/

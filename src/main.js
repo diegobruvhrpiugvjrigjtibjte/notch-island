@@ -34,7 +34,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const assistantDir = path.join(userData, 'assistant');
 
 // ---------------- Finestra ----------------
-const geom = () => { const d = screen.getPrimaryDisplay().bounds; return { x: Math.round(d.x + d.width / 2 - IW / 2), y: d.y, width: IW, height: IH }; };
+// schermo scelto nelle impostazioni ("primary" = principale); se non c'e' piu' si torna al principale
+const pickDisplay = () => { const id = store && store.settings.display; return (id && id !== 'primary' && screen.getAllDisplays().find((x) => String(x.id) === String(id))) || screen.getPrimaryDisplay(); };
+const displayList = () => screen.getAllDisplays().map((x, i) => ({ id: String(x.id), primary: x.id === screen.getPrimaryDisplay().id, label: (i + 1) + ' · ' + x.bounds.width + '×' + x.bounds.height }));
+const geom = () => { const d = pickDisplay().bounds; return { x: Math.round(d.x + d.width / 2 - IW / 2), y: d.y, width: IW, height: IH }; };
 function mkWindow() {
   const w = new BrowserWindow({ ...geom(), frame: false, transparent: true, resizable: false, movable: false, skipTaskbar: true, alwaysOnTop: true, hasShadow: false, focusable: true, show: false, backgroundColor: '#00000000',
     webPreferences: { preload: path.join(__dirname, 'shared', 'preload.js'), contextIsolation: true, backgroundThrottling: false, webviewTag: true } });
@@ -235,6 +238,7 @@ function setupIpc() {
   ipcMain.on('open-app', (_, a) => launch({ app: a }));
   // impostazioni e dati
   ipcMain.handle('boot', () => ({ locale: app.getLocale(), settings: store.settings, data: store.data, clips, shelf, voice: voice.status(), integration: integrationState(), dark: nativeTheme.shouldUseDarkColors, examples: require('./brain').EXAMPLES }));
+  ipcMain.handle('displays', () => ({ list: displayList(), current: store.settings.display }));
   ipcMain.on('set', (_, p) => { if (p && typeof p === 'object') store.patch(p); });
   ipcMain.on('settings-reset', () => store.reset());
   ipcMain.on('data-set', (_, key, value) => { if (['todos', 'notes', 'reminders', 'links'].includes(key) && Array.isArray(value)) store.mutate((d) => { d[key] = value.slice(0, 500); }); });
@@ -322,15 +326,17 @@ app.whenReady().then(() => {
   loadI18n().catch(() => { /* resta italiano */ });
   island = mkWindow(); trace('finestra creata');
   setupIpc(); registerShortcuts(); startClipboard(); setInterval(hitLoop, 40);
-  store.on('settings', (s) => { send('settings', s); registerAutostart(); registerShortcuts(); loadI18n().catch(() => { /* resta la lingua precedente */ }); });
+  store.on('settings', (s) => { if (island && !island.isDestroyed()) { island.setBounds(geom()); hitRect = null; ignoring = null; } send('settings', s); registerAutostart(); registerShortcuts(); loadI18n().catch(() => { /* resta la lingua precedente */ }); });
   store.on('data', (d) => send('data', d));
   nativeTheme.on('updated', () => send('native-theme', nativeTheme.shouldUseDarkColors));
   // promemoria in scadenza
   setInterval(() => { for (const r of store.dueReminders()) { send('reminder', r); try { new Notification({ title: T('Promemoria'), body: r.text }).show(); } catch { /* notifiche non disponibili */ } } }, 4000);
   setTimeout(() => getApps(), 5000); // precarica l'elenco applicazioni in background
-  let lastDisp = JSON.stringify(screen.getPrimaryDisplay().bounds) + screen.getPrimaryDisplay().scaleFactor;
+  let lastDisp = JSON.stringify(pickDisplay().bounds) + pickDisplay().scaleFactor;
+  screen.on('display-added', () => { island.setBounds(geom()); send('displays-changed'); });
+  screen.on('display-removed', () => { island.setBounds(geom()); send('displays-changed'); });
   screen.on('display-metrics-changed', () => {
-    const now = JSON.stringify(screen.getPrimaryDisplay().bounds) + screen.getPrimaryDisplay().scaleFactor;
+    const now = JSON.stringify(pickDisplay().bounds) + pickDisplay().scaleFactor;
     island.setBounds(geom()); if (now !== lastDisp) { lastDisp = now; setTimeout(() => island.reload(), 300); }
   });
   tray = new Tray(nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGElEQVR42mNkYPhfz0AEYBxVSF+FAAhKDveksOjmAAAAAElFTkSuQmCC'));

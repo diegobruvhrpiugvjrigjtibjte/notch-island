@@ -1,0 +1,7 @@
+{
+  "name": "notch-island",
+  "main": "./src/worker.js",
+  "compatibility_date": "2026-07-09",
+  "assets": { "directory": "./public", "binding": "ASSETS", "not_found_handling": "404-page" },
+  "r2_buckets": [{ "binding": "DOWNLOADS", "bucket_name": "notchisland-downloads" }]
+}

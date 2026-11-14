@@ -24,11 +24,12 @@ export function initSettings(root, ctx) {
   const sw = (name, label, on) => `<label class="switch"><input type="checkbox" data-sw="${name}"${on ? ' checked' : ''}><i></i><span>${label}</span></label>`;
 
   async function render() {
-    const s = ctx.settings(); voice = await api.invoke('voice:status');
+    const s = ctx.settings(); voice = await api.invoke('voice:status'); const dp = await api.invoke('displays');
     root.innerHTML = `<div class="sgrid">
       <div class="card"><h4>Lingua</h4>${seg('lang', LANG_OPTS, s.lang)}<p class="sub">Cambia la lingua dell'isola, dell'assistente e del riconoscimento vocale.</p>
         <h4 style="margin-top:12px">Aspetto</h4>${seg('theme', THEMES, s.theme)}
         <div class="sublabel">Colore</div><div class="swatches">${ACCENTS.map((a) => `<button class="swatch${s.accent === a ? ' on' : ''}" data-accent="${a}" style="background:${a}" aria-label="${a}"></button>`).join('')}</div>
+        <div class="sublabel">Schermo</div>${dp.list.length > 1 ? seg('display', [['primary', 'Principale'], ...dp.list.map((d) => [d.id, 'Schermo ' + d.label])], dp.current) : '<p class="sub">Un solo schermo collegato.</p>'}
         <div class="sublabel">Posizione</div>${seg('mode', [['floating', 'Fluttuante'], ['notch', 'Notch']], s.mode)}
         <div class="sublabel">Dimensione della pillola</div>${seg('scale', [[0.9, 'Piccola'], [1, 'Media'], [1.12, 'Grande']], s.scale)}
         <label class="slider"><span>Arrotondamento</span><input type="range" class="range" data-radius min="14" max="38" value="${s.radius}"></label>
@@ -57,6 +58,7 @@ export function initSettings(root, ctx) {
   function wire() {
     root.querySelectorAll('[data-seg]').forEach((g) => { g.onclick = (e) => { const b = e.target.closest('button'); if (!b) return; const n = g.dataset.seg; const raw = b.dataset.v; const v = n === 'scale' ? +raw : raw;
       if (n === 'lang') { ctx.setLang(v); return; }
+      if (n === 'display') { ctx.patch({ display: raw }); setTimeout(render, 150); return; }
       ctx.patch(n === 'whisperLang' || n === 'agent' ? { assistant: { [n]: v } } : { [n]: v }); setTimeout(render, 60); }; });
     root.querySelectorAll('[data-accent]').forEach((b) => { b.onclick = () => { ctx.patch({ accent: b.dataset.accent }); setTimeout(render, 60); }; });
     root.querySelectorAll('[data-sw]').forEach((i) => { i.onchange = () => ctx.patch(nest(i.dataset.sw, i.checked)); });

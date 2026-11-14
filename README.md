@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Languages](https://img.shields.io/badge/UI-English%20%7C%20Italiano-blue)](#languages)
 
-[Website](https://notch-island.pages.dev) · [English](README.md) · [Italiano](README.it.md)
+[Website](https://notch-island.pages.dev) · [English](README.md) · [Italiano](README.it.md) · **[Website & live demo](https://notch-island.lacarbonaradiego37.workers.dev)**
 
 <img src="docs/screenshots/music.png" alt="NotchIsland music tab" width="780">
 
@@ -29,7 +29,7 @@ A small pill sits at the top of your screen. Hover it and it opens into a contro
 | **Claude Code, VS Code, Chrome** | See your Claude Code sessions live (working / waiting for you / done) with a Windows notification when Claude needs you. Accept or reject proposed diffs from the island. Control VS Code (save all, terminal, search in files, open Claude) and Chrome (tabs, pause video, mute, summarize page). |
 | **15 widgets** | Clock, weather with forecast, timer + pomodoro, stopwatch, tasks, notes, reminders, calendar, system monitor, calculator, links, world clocks, unit converter, breathing, dice. Turn on, hide and reorder them. |
 | **Music that works** | Now playing from any app (Spotify, browsers, ...), cover art, synced lyrics, play/pause, **skip**, previous, a seekable progress bar and volume. |
-| **Fully customizable** | 5 themes (black, graphite, midnight, light, auto), 8 accent colors, floating or notch mode, size, roundness, hover or click to open, which tabs and widgets you see, every shortcut. |
+| **Fully customizable** | Choose which monitor shows the pill, 5 themes (black, graphite, midnight, light, auto), 8 accent colors, floating or notch mode, size, roundness, hover or click to open, which tabs and widgets you see, every shortcut. |
 | **Local and private** | Speech recognition runs on your PC (whisper.cpp). Nothing about your data is sent anywhere by NotchIsland itself ([details](#privacy-and-security)). |
 
 ## Screenshots
@@ -62,7 +62,7 @@ The closed pill adapts to what matters right now:
 
 ## Install
 
-**From a release** — download `NotchIsland-Setup-x.y.z.exe` from the [Releases](../../releases) page and run it. It installs per user (no admin rights) and starts with Windows. The installer is not code-signed, so Windows SmartScreen may ask you to confirm.
+**From a release** — download `NotchIsland-Setup-x.y.z.exe` from the [website](https://notch-island.lacarbonaradiego37.workers.dev) or the [Releases](../../releases) page and run it. A custom animated installer (English/Italian) lets you choose autostart, a desktop shortcut and the app language; it installs per user, no admin rights. The installer is not code-signed, so Windows SmartScreen may ask you to confirm.
 
 **From source**
 
@@ -71,7 +71,7 @@ git clone https://github.com/diegobruvhrpiugvjrigjtibjte/notch-island.git
 cd notch-island
 npm install
 npm start              # run in development
-npm run dist           # build the installer into dist/
+npm run build:installer   # build the custom installer into dist/ (needs Windows)
 ```
 
 > If you start it from VS Code's terminal, make sure the `ELECTRON_RUN_AS_NODE` variable is not set (VS Code sets it).
@@ -157,6 +157,8 @@ Adding a language is one file: copy [`src/i18n/en.js`](src/i18n/en.js) to `src/i
 | `src/agents/*.ps1` | Two persistent PowerShell agents: volume, mic, brightness, radios, media session (SMTC), apps, system monitor |
 | `src/island/` | UI: `face.js`, `avatar.js`, `widgets.js`, `assistant.js`, `claudeui.js`, `settings.js`, `i18n.js` |
 | `integrations/` | The VS Code extension (`.vsix`) and the Chrome extension |
+| `installer/` | The custom setup program (C#, GDI+) that wraps the silent engine |
+| `site/` | The website (static page + Cloudflare Worker) |
 
 ## Tests
 
@@ -169,6 +171,9 @@ node test/hub.test.js        # hub, hooks, security, installer of the hooks (tem
 node test/vscode.e2e.js      # real VS Code in an isolated profile
 node test/chrome.e2e.js      # real Chrome with the extension loaded
 node test/app.e2e.js         # the whole app driven over CDP (fake microphone included)
+node test/hover.e2e.js       # real mouse cursor: opens on hover, closes on leave
+node test/display.e2e.js     # multi-monitor: choose which screen shows the pill
+node test/apps.test.js       # natural phrases -> the right installed app
 node test/agent.test.js      # real Claude Code agent (uses a few requests of your plan)
 ```
 
