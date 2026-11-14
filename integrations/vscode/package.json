@@ -1,0 +1,19 @@
+{
+  "name": "notch-island",
+  "displayName": "NotchIsland",
+  "description": "Collega VS Code a NotchIsland: stato dell'editor, comandi vocali e controllo di Claude Code dall'isola.",
+  "version": "1.0.0",
+  "publisher": "vaultsemplice",
+  "license": "UNLICENSED",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "notchIsland.reconnect", "title": "NotchIsland: Reconnect" },
+      { "command": "notchIsland.status", "title": "NotchIsland: Show connection status" }
+    ]
+  },
+  "dependencies": { "ws": "^8.18.0" }
+}

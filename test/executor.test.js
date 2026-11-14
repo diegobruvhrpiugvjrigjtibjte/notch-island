@@ -1,0 +1,83 @@
+// Prova dell'esecutore con dipendenze simulate: verifica che ogni frase produca l'azione giusta.
+const fs = require('fs'), os = require('os'), path = require('path');
+const { Executor, findFolder } = require('../src/executor');
+const { Store } = require('../src/store');
+let failed = 0; const ok = (n, c, x) => { console.log((c ? 'OK   ' : 'FAIL ') + n + (c || !x ? '' : '  -> ' + x)); if (!c) failed++; };
+(async () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'notch-exec-')); const store = new Store(path.join(tmp, 's.json'));
+  const calls = []; const emitted = []; let vol = { v: 30, m: false }, micm = false, playing = true, title = 'Brano A';
+  const ctl = { send: async (c, a) => { calls.push(['ctl', c, a]); if (c === 'vol') return { ...vol }; if (c === 'volset') { vol.v = +a; vol.m = false; return { ...vol }; } if (c === 'volmute') { vol.m = !vol.m; return { m: vol.m }; } if (c === 'mic') return { m: micm, v: 90 }; if (c === 'micmute') { micm = !micm; return { m: micm }; } if (c === 'br') return { v: -1 }; if (c === 'radioset') return { ok: true }; return { ok: true }; } };
+  const info = { send: async (c, a) => { calls.push(['info', c, a]); if (c === 'now') return { title, artist: 'Artista', playing }; if (c === 'media') { if (a === 'next') title = 'Brano B'; if (a === 'pause') playing = false; if (a === 'play') playing = true; return { ok: true }; } return {}; } };
+  const sessions = []; const connected = new Set(); const hubCalls = [];
+  const hub = { connected: (k) => connected.has(k), info: (k) => (k === 'vscode' ? { file: 'a.js', workspace: 'prog', branch: 'main', errors: 2, dirty: 1 } : {}), claudeSessions: () => sessions,
+    command: async (k, c, a) => { hubCalls.push([k, c, a]); if (c === 'listTabs') return [{ title: 'Uno' }, { title: 'Due' }]; if (c === 'switchTab') return { title: 'YouTube' }; if (c === 'pageInfo') return { title: 'Pagina', text: 'x'.repeat(100) }; if (c === 'pauseMedia') return { affected: 1 }; return {}; } };
+  const claude = { findClaude: () => 'claude.exe', status: () => ({ installed: true }), ask: async (p) => 'Risposta di Claude a: ' + p.slice(0, 20), agent: (p, o) => { agentCalls.push([p, o]); return { promise: Promise.resolve({ text: 'Risposta di Claude a: ' + p.slice(0, 20), session: 'sess-' + agentCalls.length, tools: 1 }), abort() {} }; } };
+  const urls = [], launched = [], paths = [], agentCalls = [];
+  const deps = { ctl, info, hub, claude, store, ui: { emit: (...a) => emitted.push(a) }, sleep: async () => {}, now: () => new Date(2026, 10, 14, 15, 32), clipboard: { read: () => 'testo copiato', write: (t) => emitted.push(['clip', t]) },
+    screenshot: async () => 'C:\\x.png', lockPc: async () => emitted.push(['lock']), sysStats: () => ({ cpu: 12, ramPct: 54, ramUsedGB: 8.2, ramTotalGB: 15.9, diskFreeGB: 120 }), battery: async () => ({ pct: 80, charging: true }),
+    fetchJson: async (u) => (u.includes('geocoding') ? { results: [{ name: 'Roma', latitude: 41, longitude: 12 }] } : { current: { temperature_2m: 14.4, apparent_temperature: 13, weather_code: 2, wind_speed_10m: 9 } }),
+    openExternal: (u) => urls.push(u), openPath: async (p) => paths.push(p), launch: async (x) => launched.push(x), getApps: async () => [{ name: 'Spotify', appid: 'x!y' }, { name: 'Visual Studio Code', lnk: 'c.lnk' }, { name: 'Calcolatrice di prova', lnk: 'k.lnk' }], openWithCode: async (p) => paths.push('code:' + p) };
+  const ex = new Executor(deps); const say = async (t) => ex.handle(t);
+
+  let r = await say('metti in pausa la musica'); ok('pausa: usa il comando della sessione multimediale', calls.some((c) => c[0] === 'info' && c[1] === 'media' && c[2] === 'pause') && r.ok);
+  r = await say('pausa'); ok('pausa quando e\' gia\' in pausa: lo dice', /già in pausa/.test(r.say));
+  r = await say('riprendi'); ok('play', playing === true);
+  r = await say('salta questa canzone'); ok('skip: comando next e titolo nuovo', title === 'Brano B' && /Brano B/.test(r.say), r.say);
+  r = await say('che canzone sta suonando'); ok('brano attuale', /Brano B/.test(r.say));
+  r = await say('volume al 55'); ok('volume 55', vol.v === 55 && /55/.test(r.say));
+  r = await say('alza il volume'); ok('volume +10', vol.v === 65);
+  r = await say('abbassa il volume'); ok('volume -10', vol.v === 55);
+  r = await say('muta'); ok('muta', vol.m === true); r = await say('muta'); ok('muta due volte non riattiva', vol.m === true);
+  r = await say('luminosità al 40'); ok('luminosita non supportata: messaggio chiaro', !r.ok && /luminosità/.test(r.say));
+  r = await say('silenzia il microfono'); ok('microfono muto', micm === true);
+  r = await say('timer 10 minuti'); ok('timer: evento verso l\'isola', emitted.some((e) => e[0] === 'timer:start' && e[1].seconds === 600) && /10 minuti/.test(r.say), r.say);
+  r = await say('ferma il timer'); ok('timer stop', emitted.some((e) => e[0] === 'timer:stop'));
+  r = await say('ricordami di chiamare Marco tra 20 minuti'); ok('promemoria salvato', store.data.reminders.length === 1 && store.data.reminders[0].text.includes('chiamare Marco'), JSON.stringify(store.data.reminders));
+  r = await say('ricordami di comprare il pane'); ok('promemoria senza orario: chiede quando', r.ask === true);
+  r = await say('tra 5 minuti'); ok('risposta "tra 5 minuti" completa il promemoria', store.data.reminders.length === 2 && store.data.reminders[1].text === 'comprare il pane', JSON.stringify(store.data.reminders));
+  r = await say('prendi nota: idea per il sito'); ok('nota salvata', store.data.notes[0].t === 'idea per il sito');
+  r = await say('aggiungi attività: pagare la bolletta'); ok('attivita salvata', store.data.todos[0].s === 'pagare la bolletta');
+  r = await say('cosa devo fare'); ok('elenco attivita', /pagare la bolletta/.test(r.say));
+  r = await say('leggi le note'); ok('elenco note', /idea per il sito/.test(r.say));
+  r = await say('quanto fa 15 per 7'); ok('calcolo', /105/.test(r.say) && r.value === 105, r.say);
+  r = await say('converti 10 km in miglia'); ok('conversione', /6,2137/.test(r.say), r.say);
+  r = await say('tira un dado'); ok('dado 1-6', r.value >= 1 && r.value <= 6);
+  r = await say('che ore sono'); ok('ora', /15:32/.test(r.say), r.say);
+  r = await say('what time is it'); ok('ora in inglese', /3:32/.test(r.say) && r.lang === 'en', r.say);
+  r = await say('che tempo fa a Roma'); ok('meteo', /14 gradi/.test(r.say) && /parzialmente nuvoloso/.test(r.say), r.say);
+  r = await say('come sta il pc'); ok('stato del pc', /CPU al 12%/.test(r.say));
+  r = await say('quanta batteria'); ok('batteria', /80%/.test(r.say));
+  r = await say('copia: ciao'); ok('copia negli appunti', emitted.some((e) => e[0] === 'clip' && e[1] === 'ciao'));
+  r = await say('leggi gli appunti'); ok('legge gli appunti', /testo copiato/.test(r.say));
+  r = await say('mostra la scheda musica'); ok('cambio scheda dell\'isola', emitted.some((e) => e[0] === 'ui:tab' && e[1] === 'media'));
+  r = await say('cambia tema in chiaro'); ok('tema cambiato nelle impostazioni', store.settings.theme === 'light');
+  r = await say('nascondi la faccina'); ok('faccina nascosta', store.settings.face.on === false); r = await say('mostra la faccina'); ok('faccina mostrata', store.settings.face.on === true);
+  r = await say('salva tutto'); ok('VS Code non collegato: spiega cosa fare', !r.ok && r.hint === 'vscode');
+  connected.add('vscode'); r = await say('salva tutto'); ok('VS Code collegato: comando inviato', hubCalls.some((c) => c[0] === 'vscode' && c[1] === 'exec' && c[2].command === 'workbench.action.files.saveAll') && r.ok);
+  r = await say('accetta le modifiche'); ok('accetta il diff di Claude', hubCalls.some((c) => c[2] && c[2].command === 'claude-vscode.acceptProposedDiff'));
+  r = await say('cerca useState nei file'); ok('cerca nei file', hubCalls.some((c) => c[1] === 'findInFiles' && c[2].query === 'useState'));
+  r = await say('stato di vs code'); ok('stato VS Code', /a\.js/.test(r.say) && /2 errori/.test(r.say), r.say);
+  r = await say('nuova scheda'); ok('Chrome scollegato: nuova scheda nel browser predefinito', urls.length === 1);
+  r = await say('schede aperte'); ok('Chrome scollegato: spiega cosa fare', !r.ok && r.hint === 'chrome');
+  connected.add('chrome'); r = await say('schede aperte'); ok('elenco schede', /2 schede/.test(r.say) && /Uno/.test(r.say));
+  r = await say('vai alla scheda youtube'); ok('cambio scheda', /YouTube/.test(r.say));
+  r = await say('metti in pausa il video'); ok('pausa video', /in pausa/.test(r.say));
+  r = await say('cerca ricette di pasta su youtube in chrome'); ok('ricerca YouTube via Chrome', hubCalls.some((c) => c[1] === 'openUrl' && /youtube\.com\/results\?search_query=ricette/.test(c[2].url)), JSON.stringify(hubCalls.slice(-1)));
+  sessions.push({ id: 'a', project: 'sito', status: 'working', tool: 'Edit', detail: 'app.js' }); r = await say('stato di claude'); ok('stato Claude: lavora', /Claude lavora su sito \(Edit: app\.js\)/.test(r.say), r.say);
+  sessions[0] = { id: 'a', project: 'sito', status: 'waiting', message: 'Serve permesso' }; r = await say('stato di claude'); ok('stato Claude: ti aspetta', /ti aspetta su sito: Serve permesso/.test(r.say));
+  r = await say('chiedi a Claude: che cosa è un mutex'); ok('Claude risponde', /Risposta di Claude/.test(r.say) && r.via === 'claude');
+  r = await say('scrivimi una poesia sul mare'); ok('frase libera: passa a Claude', r.via === 'claude' && r.intent === 'claude.fallback');
+  r = await say('apri Spotify'); ok('apre l\'app trovata', launched.some((x) => x.app && x.app.name === 'Spotify'));
+  r = await say('apri la calcolatrice'); ok('apre la calcolatrice di Windows', launched.some((x) => x.exe === 'calc.exe'));
+  r = await say('apri netflix'); ok('app non installata: apre il sito', urls.includes('https://www.netflix.com'));
+  r = await say('apri la cartella download'); ok('apre Download', paths.some((p) => /Downloads$/.test(p)));
+  r = await say('apri la cartella secure-vault-web in vs code'); ok('cartella trovata per nome e aperta in VS Code', hubCalls.some((c) => c[1] === 'openFolder' && /secure-vault-web$/.test(c[2].path)), JSON.stringify(hubCalls.slice(-1)));
+  r = await say('ciao'); ok('saluto', r.ok && r.say.length > 3); r = await say('aiuto'); ok('aiuto', /Posso/.test(r.say));
+  ok('agente: continua la stessa chat (resume) nella richiesta seguente', agentCalls.length >= 2 && agentCalls[agentCalls.length - 1][1].resume === 'sess-' + (agentCalls.length - 1), agentCalls.map((c) => c[1].resume));
+  r = await say('dimentica la conversazione'); r = await say('scrivimi una poesia sul mare'); ok('dopo il reset la chat riparte da zero', agentCalls[agentCalls.length - 1][1].resume === '');
+  store.settings.assistant.agent = 'read'; r = await say('scrivimi un haiku'); ok('modalità sola lettura passata all agente', agentCalls[agentCalls.length - 1][1].mode === 'read'); store.settings.assistant.agent = 'act';
+  store.settings.assistant.claude = false; r = await say('scrivimi una poesia'); ok('senza Claude: dice che non ha capito', !r.ok && /Non ho capito/.test(r.say));
+  ok('cartella cercata per nome', (findFolder('secure-vault-web') || '').endsWith('secure-vault-web'));
+  fs.rmSync(tmp, { recursive: true, force: true });
+  console.log(failed === 0 ? 'ESECUTORE: TUTTO OK' : `ESECUTORE: ${failed} PROVE FALLITE`); process.exit(failed ? 1 : 0);
+})();

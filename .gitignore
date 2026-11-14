@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.log
+.vscode-test/
+integrations/vscode/_build/
+integrations/chrome/key.json
+# local test output
+test/out/
+*.part

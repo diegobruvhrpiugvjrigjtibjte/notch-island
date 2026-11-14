@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; connect-src https:; media-src 'self' blob:; frame-src https:">
+<title>NotchIsland</title>
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="island.css">
+<link rel="stylesheet" href="avatar.css">
+</head>
+<body>
+<div id="root">
+  <div id="island">
+    <div id="compact">
+      <div id="face-c"></div>
+      <div id="c-text">--:--</div>
+      <div id="c-sub"></div>
+      <div class="eq" id="eq"><i></i><i></i><i></i></div>
+    </div>
+
+    <div id="open">
+      <div id="top"><div id="face-o"></div><nav id="tabs" role="tablist"></nav><button id="lang-btn" class="lb" aria-label="Lingua"></button></div>
+
+      <section class="page" id="p-media">
+        <div class="media">
+          <div class="art" id="art"><span data-icon="music" data-size="40"></span></div>
+          <div class="meta">
+            <div class="title" id="m-title">Nessun brano in riproduzione</div>
+            <div class="artist" id="m-artist">Avvia un brano per controllarlo da qui</div>
+            <div class="prog"><span id="m-pos">0:00</span><div class="track" id="m-bar"><i id="m-fill"></i><b id="m-knob"></b></div><span id="m-dur">0:00</span></div>
+            <div class="transport">
+              <button class="tbtn" data-k="prev" aria-label="Precedente"><span data-icon="prev" data-size="20"></span></button>
+              <button class="tbtn main" data-k="toggle" id="m-pp" aria-label="Riproduci"><span data-icon="play" data-size="22"></span></button>
+              <button class="tbtn" data-k="next" aria-label="Successivo"><span data-icon="next" data-size="20"></span></button>
+            </div>
+            <div class="mvol"><span id="mv-ic" data-icon="volume" data-size="15"></span><input type="range" class="range" id="mv" min="0" max="100" value="50" aria-label="Volume"></div>
+            <div class="lyrics" id="m-lyr"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="p-assistant"></section>
+      <section class="page" id="p-claude"></section>
+
+      <section class="page" id="p-widgets">
+        <div class="whead"><span class="sub" id="w-hint">Si attivano, si spostano e si nascondono a piacere</span><button class="btn sm" id="w-edit"><span data-icon="edit" data-size="13"></span> Personalizza</button></div>
+        <div id="wgrid" class="wgrid"></div>
+        <div id="wedit" class="wedit" hidden></div>
+      </section>
+
+      <section class="page" id="p-clip"><div class="head"><h3>Cronologia appunti</h3><span class="sub">Clic per copiare, segnalibro per fissare</span></div><div id="clips" class="stack"></div></section>
+
+      <section class="page" id="p-shelf">
+        <div class="cols">
+          <div class="col">
+            <div class="head"><h3>File Shelf</h3><span class="sub">Trascina file qui, poi trascinali altrove</span></div>
+            <div id="drop"><span data-icon="tray" data-size="24"></span><span>Rilascia i file qui</span><button class="btn sm" id="pick-files">Scegli file</button></div>
+            <div id="files" class="stack"></div>
+          </div>
+          <div class="card qrcard">
+            <h4>Invia al telefono</h4>
+            <p class="sub">Stessa rete Wi-Fi. Scansiona il codice con la fotocamera.</p>
+            <img id="qr" alt="" width="150" height="150" hidden>
+            <button class="btn" id="qrbtn">Genera codice QR</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="p-ctrl">
+        <div class="cgrid">
+          <div class="card slidercard"><div class="srow"><button class="ibtn" id="vol-mute" aria-label="Silenzia"><span id="vol-ic" data-icon="volume" data-size="20"></span></button><div class="sl"><div class="sltop"><h4>Volume</h4><b id="vol-v">--</b></div><input type="range" class="range" id="vol" min="0" max="100" value="50"></div></div></div>
+          <div class="card slidercard"><div class="srow"><span class="ibtn static"><span data-icon="sun" data-size="20"></span></span><div class="sl"><div class="sltop"><h4>Luminosità</h4><b id="br-v">--</b></div><input type="range" class="range" id="br" min="0" max="100" value="50"></div></div><div class="sub" id="br-note"></div></div>
+          <button class="tile" id="mic-btn"><span id="mic-ic" data-icon="mic" data-size="20"></span><span id="mic-tx">Microfono</span></button>
+          <button class="tile" id="wifi-btn"><span data-icon="wifi" data-size="20"></span><span id="wifi-tx">Wi-Fi</span></button>
+          <button class="tile" id="bt-btn"><span data-icon="bluetooth" data-size="20"></span><span id="bt-tx">Bluetooth</span></button>
+          <button class="tile" id="night"><span data-icon="moon" data-size="20"></span><span>Luce notturna</span></button>
+          <button class="tile" data-ms="ms-settings:quietmomentshome"><span data-icon="bell" data-size="20"></span><span>Concentrazione</span></button>
+          <button class="tile" data-ms="ms-settings:powersleep"><span data-icon="bolt" data-size="20"></span><span>Energia</span></button>
+          <button class="tile" id="shot"><span data-icon="camera" data-size="20"></span><span>Screenshot</span></button>
+          <button class="tile" id="pick"><span data-icon="droplet" data-size="20"></span><span id="pick-tx">Selettore colore</span></button>
+          <button class="tile" data-say="blocca il pc"><span data-icon="plug" data-size="20"></span><span>Blocca il PC</span></button>
+          <button class="tile" data-say="apri task manager"><span data-icon="cpu" data-size="20"></span><span>Gestione attività</span></button>
+          <button class="tile" data-say="apri la calcolatrice"><span data-icon="calc" data-size="20"></span><span>Calcolatrice</span></button>
+          <button class="tile" data-say="apri esplora file"><span data-icon="file" data-size="20"></span><span>Esplora file</span></button>
+        </div>
+      </section>
+
+      <section class="page" id="p-apps">
+        <div class="searchbar"><span data-icon="search" data-size="16"></span><input id="app-q" placeholder="Cerca applicazioni" spellcheck="false" autocomplete="off"><span class="sub" id="app-n"></span></div>
+        <div id="apps" class="agrid"></div>
+      </section>
+
+      <section class="page" id="p-web">
+        <form id="web-form" class="searchbar">
+          <button type="button" class="nb" id="web-back" aria-label="Indietro"><span data-icon="prev" data-size="14"></span></button>
+          <button type="button" class="nb" id="web-fwd" aria-label="Avanti"><span data-icon="next" data-size="14"></span></button>
+          <input id="web-url" placeholder="Cerca o inserisci un indirizzo" spellcheck="false" autocomplete="off">
+          <button class="btn sm" type="submit">Vai</button>
+          <button type="button" class="btn sm ghost" id="web-ext" aria-label="Apri nel browser"><span data-icon="external" data-size="15"></span></button>
+        </form>
+        <div class="favs" id="web-favs"></div>
+        <webview id="web-frame" partition="persist:web"></webview>
+      </section>
+
+      <section class="page" id="p-set"></section>
+    </div>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+<script type="module" src="island.js"></script>
+</body></html>

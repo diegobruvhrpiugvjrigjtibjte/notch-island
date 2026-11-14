@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "NotchIsland",
+  "description": "Collega Chrome a NotchIsland: schede, media e comandi vocali.",
+  "version": "1.0.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6qDIc4WCO5u1L+D+CWWrRuWPgkAwg+g7gUheL03F9HEUF5khIQVhK5Xxtwdf9wrpl2hF59ibjj5PpCPHXBGFtWYu87aP/LJ/MGjVaZwFLPyKAP+aoLkxTUgUzwBJREwyhEjsv7QPoREZDL+Aw3r89Bj3M2jSrzj82IYQC4KlESau08D3DGlpSQ8ryvWeTD3+y6gZFwIBAHEJzvNpjfV6ZoJn12KWIzl+ijPIkBY/+2wKGOQOWLNM0s3BozstqdMJsDAVF+fIFmoLmIzrNAkW8lMdFMNPXbEUE+NRVwawir4ayxZIzoiS7Y42dewK1B7OkuEPIxI0RmQZuQrp9UM3SwIDAQAB",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "tabs",
+    "scripting",
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "NotchIsland",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "128": "icon128.png"
+  }
+}

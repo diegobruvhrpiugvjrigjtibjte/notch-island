@@ -1,0 +1,18 @@
+NotchIsland third-party and non-MIT material
+
+1. Vault avatar (src/island/avatar.css, src/island/avatar.js)
+   The blue lock mascot used in the Assistant tab is artwork from "Vault Semplice".
+   It is NOT covered by the MIT license of this repository. All rights reserved by its
+   owner. If you fork this project and do not have permission to use the artwork,
+   replace it (the assistant avatar is isolated in those two files, and the face in
+   src/island/face.js can be used instead).
+
+2. whisper.cpp (https://github.com/ggml-org/whisper.cpp) - MIT License
+   Downloaded on demand by the app (not shipped in this repository), together with the
+   ggml "small" model from https://huggingface.co/ggerganov/whisper.cpp.
+
+3. Runtime services used by the app: Open-Meteo (weather), iTunes Search API (cover art),
+   lrclib (synced lyrics). Check their terms before heavy or commercial use.
+
+4. "Claude" and "Claude Code" are trademarks of Anthropic. This project is independent and
+   is not affiliated with or endorsed by Anthropic.

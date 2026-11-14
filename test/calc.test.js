@@ -1,0 +1,10 @@
+const { evaluate, convert } = require('../src/calc');
+let failed = 0; const ok = (n, c) => { console.log((c ? 'OK   ' : 'FAIL ') + n); if (!c) failed++; };
+const ev = (e) => { try { return evaluate(e); } catch (x) { return 'ERR:' + x.message; } };
+ok('12*(3+4)/2 = 42', ev('12*(3+4)/2') === 42); ok('15 per 7 = 105', ev('15 per 7') === 105); ok('2 piu 2 = 4', ev('2 piu 2') === 4); ok('2^10 = 1024', ev('2^10') === 1024);
+ok('20% di 150 = 30', ev('20% di 150') === 30); ok('10 diviso 4 = 2.5', ev('10 diviso 4') === 2.5); ok('-2^2 = -4', ev('-2^2') === -4); ok('1,5 x 2 = 3', ev('1,5 x 2') === 3);
+ok('10%3 = 1 (resto)', ev('10%3') === 1); ok('50% = 0.5', ev('50%') === 0.5);
+ok('divisione per zero rifiutata', String(ev('1/0')).startsWith('ERR')); ok('codice rifiutato', String(ev('process.exit()')).startsWith('ERR')); ok('parentesi sbilanciate rifiutate', String(ev('(1+2')).startsWith('ERR'));
+ok('10 km = 6.2137 mi', convert(10, 'km', 'miglia').value === 6.2137); ok('100 F = 37.78 C', convert(100, 'f', 'c').value === 37.78); ok('1 kg = 2.2046 lb', convert(1, 'kg', 'lb').value === 2.2046);
+ok('km in kg rifiutato', (() => { try { convert(1, 'km', 'kg'); return false; } catch { return true; } })());
+console.log(failed === 0 ? 'CALC: TUTTO OK' : `CALC: ${failed} PROVE FALLITE`); process.exit(failed ? 1 : 0);
