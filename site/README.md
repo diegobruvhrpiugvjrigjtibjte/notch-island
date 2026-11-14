@@ -10,3 +10,7 @@ npx wrangler deploy
 ```
 
 The live demo in the page is the *real* island UI (`../src/island`) running in an iframe on top of a fake system (`src/shim.js`).
+
+## Deploy on Cloudflare Pages (notch-island.pages.dev)
+
+Copy `public/` to a folder, keep `robots.txt`, `sitemap.xml`, `_redirects` and the Google verification file, set `"url"` in `release.json` to the GitHub release asset, then `npx wrangler pages deploy <folder> --project-name notch-island --branch main`.

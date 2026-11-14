@@ -151,7 +151,7 @@ new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { con
 (async function release() {
   try {
     const r = await (await fetch('/release.json', { cache: 'no-store' })).json(); const mb = (r.size / 1048576).toFixed(0);
-    $('#relmeta').innerHTML = `<span>v${r.version}</span><span>${mb} MB</span><span>${r.date}</span><span>Windows 10/11 x64</span>`; $('#sha').textContent = 'sha256: ' + r.sha256; $('#dl').href = '/download'; $('#dl').setAttribute('download', r.file);
+    $('#relmeta').innerHTML = `<span>v${r.version}</span><span>${mb} MB</span><span>${r.date}</span><span>Windows 10/11 x64</span>`; $('#sha').textContent = 'sha256: ' + r.sha256; $('#dl').href = r.url || '/download'; $('#dl').setAttribute('download', r.file);
   } catch { $('#sha').textContent = ''; }
   $('#copysha').onclick = async () => { try { await navigator.clipboard.writeText($('#sha').textContent.replace('sha256: ', '')); const b = $('#copysha'); b.textContent = t('i.copied'); setTimeout(() => { b.textContent = t('i.copy'); }, 1500); } catch { /* appunti non disponibili */ } };
   if (!/Windows/i.test(navigator.userAgent)) $('#osnote').hidden = false;

@@ -4,7 +4,7 @@
 
 **Una Dynamic Island per Windows con una faccina, che ti ascolta e parla con Claude Code.**
 
-[Sito web](https://notch-island.pages.dev) · [English](README.md) · [Italiano](README.it.md) · **[Sito e demo dal vivo](https://notch-island.lacarbonaradiego37.workers.dev)**
+[Sito web](https://notch-island.pages.dev) · [English](README.md) · [Italiano](README.it.md) · **[Demo dal vivo](https://notch-island.lacarbonaradiego37.workers.dev)**
 
 <img src="docs/screenshots/music.png" alt="Scheda musica di NotchIsland" width="780">
 
