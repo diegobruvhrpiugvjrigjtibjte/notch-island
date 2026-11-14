@@ -4,7 +4,7 @@ import { mountFace, setMood, setCursor, flash } from './demo/island/face.js';
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const saved = (() => { try { return localStorage.getItem('lang'); } catch { return null; } })();
-let lang = saved || (/^it/i.test(navigator.language) ? 'it' : 'en');
+let lang = saved || 'en';
 let accent = '#8ab4ff';
 const t = (k) => (S[lang] && S[lang][k]) || S.en[k] || k;
 
