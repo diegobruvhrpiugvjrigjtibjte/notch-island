@@ -14,7 +14,7 @@ function hintText() { return coarse ? (lang === 'it' ? 'Tocca la pillola — è 
 function applyLang() {
   document.documentElement.lang = lang; $('#lang').textContent = lang === 'it' ? 'EN' : 'IT';
   $$('[data-i]').forEach((e) => { e.textContent = t(e.dataset.i); }); $$('[data-i-html]').forEach((e) => { e.innerHTML = t(e.dataset.iHtml); });
-  fillMarquee(); splitHeadline(); loadDemos(); const hs = $('#hint1 span'); if (hs) hs.textContent = hintText(); chatRestart(); termRestart();
+  fillMarquee(); splitHeadline(); loadDemos();  chatRestart(); termRestart();
 }
 $('#lang').onclick = () => { lang = lang === 'it' ? 'en' : 'it'; try { localStorage.setItem('lang', lang); } catch { /* storage non disponibile */ } applyLang(); };
 
@@ -59,7 +59,9 @@ function Demo(frame, stage, opts) {
   const d = { frame, stage, opts, rect: null, scale: 1 };
   const box = document.createElement('div'); box.className = 'stagebox' + (opts.compactH ? ' open' : ''); stage.before(box); box.append(stage); d.box = box;
   const fit = () => {
-    const bw = box.clientWidth || innerWidth; let sc = Math.min(opts.max || 1.3, Math.max(0.3, bw / 820)), off = Math.max(0, (bw - 820 * sc) / 2), bh = (opts.compactH || 470) * sc;
+    const bw = box.clientWidth || innerWidth;
+    if (opts.desk) { const dw = $('#desk').clientWidth; const sc2 = dw / (dw < 600 ? 700 : 1300); d.scale = sc2; stage.style.transition = 'none'; stage.style.transform = `translateX(${dw / 2 - 410 * sc2}px) scale(${sc2})`; box.style.height = (470 * sc2) + 'px'; box.style.width = dw + 'px'; return; }
+    let sc = Math.min(opts.max || 1.3, Math.max(0.3, bw / 820)), off = Math.max(0, (bw - 820 * sc) / 2), bh = (opts.compactH || 470) * sc;
     if (opts.compactH && bw < 700) { // telefono: pillola chiusa grande e centrata; aperta, l'isola si adatta alla larghezza
       bh = opts.compactH * 1.05; if (d.open) { sc = bw / 820; off = 0; } else { sc = 1.05; off = bw / 2 - 410 * sc; }
     }
@@ -70,7 +72,7 @@ function Demo(frame, stage, opts) {
   d.toLocal = (e) => { const r = frame.getBoundingClientRect(); return { x: (e.clientX - r.left) / d.scale, y: (e.clientY - r.top) / d.scale }; };
   demos.push(d); return d;
 }
-const d1 = Demo($('#demo1'), $('#stage1'), { max: 1.35, compactH: 100 }), d2 = Demo($('#demo2'), $('#stage2'), { max: 1.2 });
+const d1 = Demo($('#demo1'), $('#stage1'), { desk: true }), d2 = Demo($('#demo2'), $('#stage2'), { max: 1.2 });
 let d2Wanted = false;
 function loadDemos() { const q = (extra) => `/demo/island/?lang=${lang}&accent=${encodeURIComponent(accent)}${extra}`; d1.frame.src = q(''); d1.rect = d2.rect = null; if (d2Wanted) d2.frame.src = q('&pin=1&tab=media'); else d2.frame.removeAttribute('src'); }
 new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting) && !d2Wanted) { d2Wanted = true; loadDemos(); } }, { rootMargin: '700px' }).observe($('#demo'));
@@ -84,9 +86,9 @@ addEventListener('message', (e) => {
 // il sito inoltra il mouse alle demo: l'iframe riceve i clic solo quando il cursore e' sopra l'isola (come nell'app vera)
 function forward(e) {
   for (const d of demos) {
+    if (d === d1 && !(e.target.closest && e.target.closest('#desk'))) continue; // fuori dal desktop finto comanda lo scorrimento
     const p = d.toLocal(e), r = d.rect; d.post({ type: 'pointer', x: p.x, y: p.y });
     const inside = r && p.x >= r.x - 2 && p.x <= r.x + r.w + 2 && p.y >= r.y - 2 && p.y <= r.y + r.h + 2; if (!coarse) d.frame.style.pointerEvents = inside ? 'auto' : 'none';
-    if (d === d1) $('#hint1').style.opacity = inside || d1.opened ? 0 : 1;
   }
 }
 addEventListener('pointermove', forward, { passive: true }); document.addEventListener('pointerleave', () => demos.forEach((d) => d.post({ type: 'leave' })));
@@ -172,3 +174,24 @@ new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { con
 // la faccina del logo e' contenta quando passi sui pulsanti principali
 $$('.btn').forEach((b) => { b.addEventListener('pointerenter', () => flash('happy', 900)); });
 applyLang();
+
+
+// ---------------------------------------------------------------- desktop finto: l'isola si apre e cambia scheda mentre scorri
+(function deskScroll() {
+  const wrap = $('#deskwrap'), caps = $$('#deskcap span'); let phase = -1;
+  const tick = () => { const n = new Date(); $('#tbclock').textContent = n.toLocaleTimeString(lang === 'it' ? 'it-IT' : 'en-GB', { hour: '2-digit', minute: '2-digit' }); }; tick(); setInterval(tick, 20000);
+  const at = (x, y) => d1.post({ type: 'pointer', x, y });
+  function go(p) {
+    if (p === phase) return; const was = phase; phase = p; caps.forEach((c, i) => c.classList.toggle('on', i === p)); d1.fit();
+    if (p === 0) { d1.post({ type: 'leave' }); at(-999, 900); return; }
+    at(410, 30); // il cursore "sta sopra la pillola": si apre
+    const tab = ['', 'media', 'assistant', 'claude', 'widgets'][p]; setTimeout(() => d1.post({ type: 'tab', tab }), was <= 0 ? 700 : 150); setTimeout(() => d1.post({ type: 'tab', tab }), was <= 0 ? 1300 : 800);
+    if (p === 3) setTimeout(() => d1.post({ type: 'sim', what: 'claude' }), 900);
+  }
+  addEventListener('scroll', () => {
+    const r = wrap.getBoundingClientRect(), total = wrap.offsetHeight - innerHeight + 76; const prog = Math.min(1, Math.max(0, -(r.top - 0) / Math.max(1, total)));
+    go(prog < 0.08 ? 0 : prog < 0.32 ? 1 : prog < 0.52 ? 2 : prog < 0.74 ? 3 : prog < 0.92 ? 4 : 0);
+  }, { passive: true });
+  setInterval(() => { if (phase > 0) at(410, 30); }, 700); // come nell'app vera: "sei ancora sopra" ripetuto, l'isola non si richiude
+  go(0);
+})();
