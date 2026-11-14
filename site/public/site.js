@@ -3,16 +3,18 @@ import { mountFace, setMood, setCursor, flash } from './demo/island/face.js';
 
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const coarse = matchMedia('(pointer: coarse)').matches || matchMedia('(hover: none)').matches;
 const saved = (() => { try { return localStorage.getItem('lang'); } catch { return null; } })();
 let lang = saved || 'en';
 let accent = '#8ab4ff';
 const t = (k) => (S[lang] && S[lang][k]) || S.en[k] || k;
 
 // ---------------------------------------------------------------- lingua
+function hintText() { return coarse ? (lang === 'it' ? 'Tocca la pillola — è l\'app vera' : 'Tap the pill — it is the real app') : t('hero.hint'); }
 function applyLang() {
   document.documentElement.lang = lang; $('#lang').textContent = lang === 'it' ? 'EN' : 'IT';
   $$('[data-i]').forEach((e) => { e.textContent = t(e.dataset.i); }); $$('[data-i-html]').forEach((e) => { e.innerHTML = t(e.dataset.iHtml); });
-  fillMarquee(); splitHeadline(); loadDemos(); chatRestart(); termRestart();
+  fillMarquee(); splitHeadline(); loadDemos(); const hs = $('#hint1 span'); if (hs) hs.textContent = hintText(); chatRestart(); termRestart();
 }
 $('#lang').onclick = () => { lang = lang === 'it' ? 'en' : 'it'; try { localStorage.setItem('lang', lang); } catch { /* storage non disponibile */ } applyLang(); };
 
@@ -28,10 +30,10 @@ function splitHeadline() { // lettere che arrivano una a una
 }
 
 // ---------------------------------------------------------------- cursore luminoso, bottoni magnetici, tilt
-const glow = $('#glow');
+const glow = $('#glow'); if (coarse) glow.remove();
 addEventListener('pointermove', (e) => { glow.style.transform = `translate(${e.clientX - 210}px,${e.clientY - 210}px)`; }, { passive: true });
-$$('.mag').forEach((b) => { b.addEventListener('pointermove', (e) => { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.18}px,${(e.clientY - r.top - r.height / 2) * 0.28}px)`; }); b.addEventListener('pointerleave', () => { b.style.transform = ''; }); });
-$$('.tilt').forEach((c) => { c.addEventListener('pointermove', (e) => { const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; c.style.transform = `perspective(700px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateZ(6px)`; }); c.addEventListener('pointerleave', () => { c.style.transform = ''; }); });
+if (!coarse) $$('.mag').forEach((b) => { b.addEventListener('pointermove', (e) => { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.18}px,${(e.clientY - r.top - r.height / 2) * 0.28}px)`; }); b.addEventListener('pointerleave', () => { b.style.transform = ''; }); });
+if (!coarse) $$('.tilt').forEach((c) => { c.addEventListener('pointermove', (e) => { const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; c.style.transform = `perspective(700px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateZ(6px)`; }); c.addEventListener('pointerleave', () => { c.style.transform = ''; }); });
 
 // ---------------------------------------------------------------- aurora (canvas) dell'hero
 (function aurora() {
@@ -55,17 +57,27 @@ $$('.tilt').forEach((c) => { c.addEventListener('pointermove', (e) => { const r 
 const demos = [];
 function Demo(frame, stage, opts) {
   const d = { frame, stage, opts, rect: null, scale: 1 };
-  const fit = () => { const wrap = stage.parentElement; const avail = Math.min(wrap.clientWidth, innerWidth - 24); d.scale = Math.min(opts.max || 1.3, Math.max(0.42, avail / 820)); stage.style.transform = `scale(${d.scale})`; stage.style.width = '820px'; if (opts.compactH) { stage.style.height = opts.compactH + 'px'; stage.style.marginBottom = (opts.compactH * (d.scale - 1)) + 'px'; } else stage.style.marginBottom = (-(470 * (1 - d.scale))) + 'px'; }; fit(); addEventListener('resize', fit); d.fit = fit;
+  const box = document.createElement('div'); box.className = 'stagebox' + (opts.compactH ? ' open' : ''); stage.before(box); box.append(stage); d.box = box;
+  const fit = () => {
+    const bw = box.clientWidth || innerWidth; let sc = Math.min(opts.max || 1.3, Math.max(0.3, bw / 820)), off = Math.max(0, (bw - 820 * sc) / 2), bh = (opts.compactH || 470) * sc;
+    if (opts.compactH && bw < 700) { // telefono: pillola chiusa grande e centrata; aperta, l'isola si adatta alla larghezza
+      bh = opts.compactH * 1.05; if (d.open) { sc = bw / 820; off = 0; } else { sc = 1.05; off = bw / 2 - 410 * sc; }
+    }
+    d.scale = sc; stage.style.transform = `translateX(${off}px) scale(${sc})`; box.style.height = bh + 'px';
+  };
+  const fitOld = () => { const wrap = stage.parentElement; const avail = Math.min(wrap.clientWidth, innerWidth - 24); d.scale = Math.min(opts.max || 1.3, Math.max(0.42, avail / 820)); stage.style.transform = `scale(${d.scale})`; stage.style.width = '820px'; if (opts.compactH) { stage.style.height = opts.compactH + 'px'; stage.style.marginBottom = (opts.compactH * (d.scale - 1)) + 'px'; } else stage.style.marginBottom = (-(470 * (1 - d.scale))) + 'px'; }; fit(); addEventListener('resize', fit); d.fit = fit; addEventListener('orientationchange', () => setTimeout(fit, 200));
   d.post = (m) => { try { frame.contentWindow.postMessage({ src: 'notch-site', ...m }, '*'); } catch { /* iframe non pronta */ } };
   d.toLocal = (e) => { const r = frame.getBoundingClientRect(); return { x: (e.clientX - r.left) / d.scale, y: (e.clientY - r.top) / d.scale }; };
   demos.push(d); return d;
 }
 const d1 = Demo($('#demo1'), $('#stage1'), { max: 1.35, compactH: 100 }), d2 = Demo($('#demo2'), $('#stage2'), { max: 1.2 });
-function loadDemos() { const q = (extra) => `/demo/island/?lang=${lang}&accent=${encodeURIComponent(accent)}${extra}`; d1.frame.src = q(''); d2.frame.src = q('&pin=1&tab=media'); d1.rect = d2.rect = null; }
+let d2Wanted = false;
+function loadDemos() { const q = (extra) => `/demo/island/?lang=${lang}&accent=${encodeURIComponent(accent)}${extra}`; d1.frame.src = q(''); d1.rect = d2.rect = null; if (d2Wanted) d2.frame.src = q('&pin=1&tab=media'); else d2.frame.removeAttribute('src'); }
+new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting) && !d2Wanted) { d2Wanted = true; loadDemos(); } }, { rootMargin: '700px' }).observe($('#demo'));
 addEventListener('message', (e) => {
   const m = e.data; if (!m || m.src !== 'notch-demo') return;
   const d = e.source === d1.frame.contentWindow ? d1 : e.source === d2.frame.contentWindow ? d2 : null;
-  if (m.type === 'rect' && d) d.rect = m.rect;
+  if (m.type === 'rect' && d) { d.rect = m.rect; if (d === d1) { const o = m.rect.w > 300; if (o !== !!d.open) { d.open = o; d.fit(); } } if (coarse && d === d1) { d.frame.style.height = Math.ceil(m.rect.y + m.rect.h + 14) + 'px'; d.frame.style.pointerEvents = 'auto'; } }
   else if (m.type === 'settings' && m.settings && m.settings.accent && m.settings.accent !== accent) setAccent(m.settings.accent, true);
   else if (m.type === 'lang' && m.lang !== lang) { lang = m.lang; applyLang(); }
 });
@@ -73,7 +85,7 @@ addEventListener('message', (e) => {
 function forward(e) {
   for (const d of demos) {
     const p = d.toLocal(e), r = d.rect; d.post({ type: 'pointer', x: p.x, y: p.y });
-    const inside = r && p.x >= r.x - 2 && p.x <= r.x + r.w + 2 && p.y >= r.y - 2 && p.y <= r.y + r.h + 2; d.frame.style.pointerEvents = inside ? 'auto' : 'none';
+    const inside = r && p.x >= r.x - 2 && p.x <= r.x + r.w + 2 && p.y >= r.y - 2 && p.y <= r.y + r.h + 2; if (!coarse) d.frame.style.pointerEvents = inside ? 'auto' : 'none';
     if (d === d1) $('#hint1').style.opacity = inside || d1.opened ? 0 : 1;
   }
 }

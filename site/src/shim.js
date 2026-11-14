@@ -137,6 +137,7 @@ const api = {
 // la funzione "convert" usa 4 argomenti: l'invoke originale li passa tutti
 api.invoke = ((orig) => function (ch, a, b, c) { if (ch === 'convert') { try { return Promise.resolve({ ok: true, ...calc.convert(+a, b, c) }); } catch (e) { return Promise.resolve({ ok: false, error: e.message }); } } return orig.call(api, ch, a, b); })(api.invoke);
 window.nApi = api;
+document.documentElement.style.touchAction = 'pan-y'; // sul telefono lo scorrimento verticale va alla pagina del sito, non alla demo
 
 // ---------------------------------------------------------------- mouse: il sito inoltra le coordinate, qui si decide quando "sei sopra l'isola"
 let hit = null, inside = false, lastSent = 0;
