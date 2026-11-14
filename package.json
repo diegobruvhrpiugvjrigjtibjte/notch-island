@@ -1,13 +1,14 @@
 {
   "name": "notch-island",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "Dynamic Island per Windows con assistente, Claude Code, VS Code e Chrome",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win",
     "test": "node test/brain.test.js && node test/executor.test.js && node test/calc.test.js && node test/voice.test.js && node test/hub.test.js",
-    "docs:screenshots": "node scripts/make-screenshots.js docs/screenshots"
+    "docs:screenshots": "node scripts/make-screenshots.js docs/screenshots",
+    "build:installer": "node installer/build.js"
   },
   "dependencies": {
     "qrcode": "^1.5.4",
@@ -22,13 +23,16 @@
     "productName": "NotchIsland",
     "win": {
       "target": "nsis",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": false,
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-      "runAfterFinish": true,
-      "artifactName": "NotchIsland-Setup-${version}.exe"
+      "runAfterFinish": false,
+      "artifactName": "NotchIsland-Engine-${version}.exe",
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": true
     },
     "files": [
       "src/**",
@@ -40,6 +44,7 @@
     "asar": false
   },
   "license": "MIT",
+  "homepage": "https://notch-island.pages.dev",
   "author": "NotchIsland contributors",
   "keywords": [
     "dynamic-island",

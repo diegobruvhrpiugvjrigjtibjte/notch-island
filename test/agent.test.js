@@ -24,6 +24,11 @@ let failed = 0; const ok = (n, c, x) => { console.log((c ? 'OK   ' : 'FAIL ') + 
   // 4) interruzione
   const b = claude.agent('Conta lentamente da 1 a 200 eseguendo un comando di terminale separato per ogni numero.', { cwd });
   setTimeout(() => b.abort(), 6000); const r4 = await b.promise.then(() => 'finito', (e) => e.message); ok('si puo\' interrompere (Stop)', r4 === 'Interrotto', r4);
+  // 5) aprire un'app di Windows che il menu Start non risolve da solo (stesso testo che usa l'assistente)
+  const { execSync } = require('child_process'); const running = () => { try { return /SnippingTool|ScreenClippingHost/i.test(execSync('tasklist', { encoding: 'utf8' })); } catch { return false; } };
+  const r5 = await claude.agent('Apri l applicazione "Strumento di cattura" su questo PC. Se non la trovi per nome, cercala tra i programmi installati (Get-StartApps, collegamenti del menu Start, Program Files) e avviala. Rispondi con una frase breve.', { cwd }).promise.catch((e) => ({ text: String(e.message) }));
+  let up = false; for (let i = 0; i < 10 && !up; i++) { up = running(); if (!up) await new Promise((r) => setTimeout(r, 1000)); }
+  ok('apre davvero l app (il processo e partito)', up, r5.text); try { execSync('taskkill /IM SnippingTool.exe /F', { stdio: 'ignore' }); } catch { /* chiusa */ } try { execSync('taskkill /IM ScreenClippingHost.exe /F', { stdio: 'ignore' }); } catch { /* chiusa */ }
   fs.rmSync(tmp, { recursive: true, force: true });
   console.log(failed === 0 ? 'AGENTE: TUTTO OK' : `AGENTE: ${failed} PROVE FALLITE`); process.exit(failed ? 1 : 0);
 })();

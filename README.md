@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Languages](https://img.shields.io/badge/UI-English%20%7C%20Italiano-blue)](#languages)
 
-[English](README.md) · [Italiano](README.it.md)
+[Website](https://notch-island.pages.dev) · [English](README.md) · [Italiano](README.it.md)
 
 <img src="docs/screenshots/music.png" alt="NotchIsland music tab" width="780">
 

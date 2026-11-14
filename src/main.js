@@ -85,7 +85,7 @@ function startServer() {
 }
 
 // ---------------- Hit-test: la finestra e' trasparente al mouse tranne sopra l'isola ----------------
-let hitRect = null, ignoring = null, lastCur = '';
+let hitRect = null, ignoring = null, lastCur = '', lastHoverSent = 0;
 function hitLoop() {
   if (!island || island.isDestroyed() || !island.isVisible()) return;
   const p = screen.getCursorScreenPoint(), b = island.getBounds();
@@ -93,7 +93,8 @@ function hitLoop() {
   if (key !== lastCur) { lastCur = key; send('cursor', { x: cx, y: cy }); } // la faccina segue il mouse ovunque sia
   if (!hitRect) return;
   const r = hitRect, inside = cx >= r.x - 2 && cx <= r.x + r.w + 2 && cy >= r.y - 2 && cy <= r.y + r.h + 2;
-  if (ignoring !== !inside) { ignoring = !inside; island.setIgnoreMouseEvents(!inside, { forward: true }); send('hover', inside); }
+  if (ignoring !== !inside) { ignoring = !inside; island.setIgnoreMouseEvents(!inside, { forward: true }); send('hover', inside); lastHoverSent = Date.now(); }
+  else if (inside && Date.now() - lastHoverSent > 600) { send('hover', true); lastHoverSent = Date.now(); } // ripete "sei sopra": nessun evento perso
 }
 
 // ---------------- Sistema ----------------
@@ -286,8 +287,9 @@ function registerShortcuts() {
 
 function registerAutostart() {
   if (!app.isPackaged) return;
-  const exe = process.execPath;
-  execFile('reg', ['add', 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', 'NotchIsland', '/t', 'REG_SZ', '/d', '"' + exe + '"', '/f'], () => {});
+  const exe = process.execPath, KEY = 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run';
+  if (store.settings.autostart === false) execFile('reg', ['delete', KEY, '/v', 'NotchIsland', '/f'], () => {});
+  else execFile('reg', ['add', KEY, '/v', 'NotchIsland', '/t', 'REG_SZ', '/d', '"' + exe + '"', '/f'], () => {});
   execFile('reg', ['delete', 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', 'electron.app.Electron', '/f'], () => {});
 }
 
@@ -320,7 +322,7 @@ app.whenReady().then(() => {
   loadI18n().catch(() => { /* resta italiano */ });
   island = mkWindow(); trace('finestra creata');
   setupIpc(); registerShortcuts(); startClipboard(); setInterval(hitLoop, 40);
-  store.on('settings', (s) => { send('settings', s); registerShortcuts(); loadI18n().catch(() => { /* resta la lingua precedente */ }); });
+  store.on('settings', (s) => { send('settings', s); registerAutostart(); registerShortcuts(); loadI18n().catch(() => { /* resta la lingua precedente */ }); });
   store.on('data', (d) => send('data', d));
   nativeTheme.on('updated', () => send('native-theme', nativeTheme.shouldUseDarkColors));
   // promemoria in scadenza

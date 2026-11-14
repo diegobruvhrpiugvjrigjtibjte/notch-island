@@ -176,16 +176,28 @@ function recoverCase(raw, t, args) {
   return out;
 }
 
+/** Toglie i riempitivi del parlato ("per favore", "puoi aprire l'app di ...", "... sul pc") e porta gli infiniti all'imperativo. */
+function tidy(t) {
+  let s = t;
+  s = s.replace(/^(?:ehi |hey |ok |ciao |dai |allora |senti )+/, '').replace(/^(?:per favore |per piacere |please |ti prego )/, '');
+  s = s.replace(/^(?:puoi|potresti|riesci a|mi puoi|mi potresti|vorrei che|voglio che|can you|could you|would you|i want you to|i would like you to)\s+/, '');
+  s = s.replace(/^(?:mi |ti chiedo di |devi |dovresti )/, '');
+  s = s.replace(/^(aprire|aprirmi|aprimi|apri mi)\b/, 'apri').replace(/^(avviare|avviarmi|avviami)\b/, 'avvia').replace(/^(lanciare|lanciami)\b/, 'lancia').replace(/^(spegnere)\b/, 'spegni').replace(/^(accendere)\b/, 'accendi').replace(/^(disattivare)\b/, 'disattiva').replace(/^(attivare)\b/, 'attiva').replace(/^(mettere)\b/, 'metti').replace(/^(abbassare)\b/, 'abbassa').replace(/^(alzare)\b/, 'alza').replace(/^(cercare)\b/, 'cerca');
+  s = s.replace(/^(apri|avvia|lancia|open|launch|start|run)\s+(?:(?:l'|l |un |una |il |lo |la |the |my ))?(?:app(?:licazione)?|programma|program|application)(?: di| del| della| dello| per)? /, '$1 ');
+  s = s.replace(/\s+(?:per favore|per piacere|please|grazie|thanks|sul pc|sul computer|su windows|on my pc|on the pc|adesso|ora|subito|now|se puoi)$/, '');
+  return s.trim();
+}
+
 /** @returns {{intent:string,args?:object,lang:string,raw:string}|null} */
 function parse(text, defaultLang = 'it') {
   const raw = String(text || '').trim(); if (!raw) return null;
-  const t = norm(raw);
+  const t0 = norm(raw), t = tidy(t0);
   const enW = /\b(the|please|open|set|what|how|next|skip|volume up|remind|search|play|turn|my)\b/.test(t), itW = /\b(il|la|di|per|che|apri|metti|imposta|cerca|salta)\b/.test(t);
   const lang = enW && !itW ? 'en' : itW && !enW ? 'it' : defaultLang;
   for (const [re, fn] of rules) {
     const m = re.exec(t);
     if (!m) continue;
-    const r = fn(m); if (r) return { ...r, args: recoverCase(raw, t, r.args), lang, raw };
+    const r = fn(m); if (r) return { ...r, args: recoverCase(raw, t0, r.args), lang, raw };
   }
   return null;
 }

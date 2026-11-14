@@ -69,7 +69,7 @@ export default {
     "Cambia la lingua dell'isola, dell'assistente e del riconoscimento vocale.": "Changes the language of the island, the assistant and speech recognition.",
     "Faccina": "Face", "Mostra la faccina": "Show the face", "Si addormenta se non la usi": "Falls asleep when idle",
     "Segue il mouse, sorride con la musica, ti avvisa quando Claude ti aspetta. Cliccala per farle una sorpresa.": "It follows the mouse, smiles with the music and alerts you when Claude is waiting. Click it for a surprise.",
-    "Pillola chiusa": "Closed pill", "Solo faccina": "Face only", "Orologio a 24 ore": "24-hour clock", "Mostra i secondi": "Show seconds", "Schede visibili": "Visible tabs",
+    "Pillola chiusa": "Closed pill", "Solo faccina": "Face only", "Orologio a 24 ore": "24-hour clock", "Avvia con Windows": "Start with Windows", "Mostra i secondi": "Show seconds", "Schede visibili": "Visible tabs",
     "I widget si scelgono e si riordinano dalla scheda Widget, con \"Personalizza\".": "Widgets are chosen and reordered from the Widgets tab with \"Customize\".",
     "Risponde a voce": "Speaks its answers", "Passa a Claude Code quello che non capisce": "Hands what it does not understand to Claude Code", "Cosa può fare Claude per te": "What Claude can do for you", "Agisce sul PC": "Acts on the PC", "Solo legge": "Read only", "Spento": "Off",
     "Lingua del riconoscimento vocale": "Speech recognition language", "voce installata": "voice installed", "voce non installata": "voice not installed",

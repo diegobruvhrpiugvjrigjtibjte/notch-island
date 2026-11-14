@@ -129,7 +129,12 @@ class Executor {
       case 'agent.reset': this.reset(); return ok(l('Ricominciamo da capo: ho dimenticato la conversazione.', 'Fresh start: I forgot the conversation.'));
       // ---------------------------------------------------------------- VS Code
       case 'vscode.cmd': {
-        if (!d.hub.connected('vscode')) return ko(l('VS Code non è collegato all\'isola. Installa l\'estensione dalla scheda Claude.', 'VS Code is not connected. Install the extension from the Claude tab.'), { hint: 'vscode' });
+        if (!d.hub.connected('vscode')) {
+          // senza VS Code collegato, alcune frasi hanno comunque un equivalente in Windows
+          if (A.cmd === 'workbench.action.terminal.new') { await d.launch({ exe: 'wt.exe' }); return ok(l('Apro il terminale di Windows.', 'Opening the Windows terminal.')); }
+          if (A.cmd === 'claude-vscode.sidebar.open') { const app = findApp(await d.getApps().catch(() => []), 'claude'); if (app) { await d.launch({ app }); return ok(l('Apro Claude.', 'Opening Claude.')); } }
+          return ko(l('VS Code non è collegato all\'isola. Installa l\'estensione dalla scheda Claude.', 'VS Code is not connected. Install the extension from the Claude tab.'), { hint: 'vscode' });
+        }
         await d.hub.command('vscode', 'exec', { command: A.cmd }); return ok(l('Fatto, in VS Code.', 'Done, in VS Code.'));
       }
       case 'vscode.find': { if (!d.hub.connected('vscode')) return ko(l('VS Code non è collegato.', 'VS Code is not connected.'), { hint: 'vscode' }); await d.hub.command('vscode', 'findInFiles', { query: A.query }); return ok(l(`Cerco "${A.query}" nei file di VS Code.`, `Searching "${A.query}" in VS Code.`)); }
@@ -237,11 +242,32 @@ class Executor {
     if (A.inChrome && A.fallbackUrl) { await this.openUrl(A.fallbackUrl, true); return { ok: true, say: l(`Apro ${A.name} in Chrome.`, `Opening ${A.name} in Chrome.`) }; }
     if (DIRECT[name]) { await d.launch({ exe: DIRECT[name] }); return { ok: true, say: l(`Apro ${A.name}.`, `Opening ${A.name}.`) }; }
     let apps = []; try { apps = await d.getApps(); } catch { /* elenco non disponibile */ }
-    const scored = apps.map((a) => { const n = norm(a.name); return { a, s: n === name ? 3 : n.startsWith(name) ? 2 : n.includes(name) ? 1 : 0 }; }).filter((x) => x.s > 0).sort((x, y) => y.s - x.s || x.a.name.length - y.a.name.length);
-    if (scored.length) { await d.launch({ app: scored[0].a }); return { ok: true, say: l(`Apro ${scored[0].a.name}.`, `Opening ${scored[0].a.name}.`) }; }
+    const best = findApp(apps, name);
+    if (best) { await d.launch({ app: best }); return { ok: true, say: l(`Apro ${best.name}.`, `Opening ${best.name}.`) }; }
     if (A.fallbackUrl) { await this.openUrl(A.fallbackUrl, false); return { ok: true, say: l(`Apro ${A.name} nel browser.`, `Opening ${A.name} in the browser.`) }; }
+    // non e' nell'elenco: prova con il nome come comando di Windows (App Paths / PATH), poi lascia fare all'agente
+    const a = d.store.settings.assistant;
+    if (a.claude && a.agent !== 'off' && d.claude.findClaude()) {
+      return this.runAgent(lang === 'en' ? `Open the application "${A.name}" on this PC. If you cannot find it by name, search the installed programs (Get-StartApps, Start Menu shortcuts, Program Files) and launch it. Reply with one short sentence.` : `Apri l'applicazione "${A.name}" su questo PC. Se non la trovi per nome, cercala tra i programmi installati (Get-StartApps, collegamenti del menu Start, Program Files) e avviala. Rispondi con una frase breve.`, lang);
+    }
     return { ok: false, say: l(`Non trovo l'applicazione "${A.name}".`, `I cannot find the app "${A.name}".`) };
   }
+}
+
+
+// ---- ricerca tollerante delle app installate
+const lev = (a, b) => { const m = a.length, n = b.length; if (!m) return n; if (!n) return m; let p = Array.from({ length: n + 1 }, (_, j) => j); for (let i = 1; i <= m; i++) { const c = [i]; for (let j = 1; j <= n; j++) c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); p = c; } return p[n]; };
+const ALIASES = { 'vs code': 'visual studio code', vscode: 'visual studio code', code: 'visual studio code', chrome: 'google chrome', edge: 'microsoft edge', opera: 'browser opera gx', teams: 'microsoft teams', 'power point': 'powerpoint', terminal: 'terminale', 'prompt dei comandi': 'command prompt', cmd: 'command prompt', 'esplora risorse': 'file explorer', 'gestione attivita': 'task manager', 'visual studio': 'visual studio code', 'claude code': 'claude' };
+function scoreApp(q, n) {
+  if (n === q) return 100; if (n.startsWith(q + ' ') || n.startsWith(q)) return 90; if (n.includes(q)) return 80;
+  const qt = q.split(' ').filter(Boolean), nt = n.split(/[\s\-_.]+/).filter(Boolean);
+  if (qt.length && qt.every((t) => nt.some((w) => w.startsWith(t) || (t.length > 3 && lev(w.slice(0, t.length + 1), t) <= Math.floor(t.length / 4))))) return 70;
+  const sim = 1 - lev(q, n) / Math.max(q.length, n.length); return sim >= 0.72 ? 50 * sim : 0;
+}
+function findApp(apps, name) {
+  const q = ALIASES[name] || name; let best = null, bs = 0;
+  for (const a of apps) { const s = scoreApp(q, norm(a.name)) - (/(uninstall|installer|manager|tools|reference|documentation|samples|docs)/i.test(a.name) ? 15 : 0) - Math.min(8, a.name.length / 12); if (s > bs) { bs = s; best = a; } }
+  return bs >= 40 ? best : null;
 }
 
 const L = (lang, it, en) => (lang === 'en' ? en : it);
@@ -269,4 +295,4 @@ function findFolder(q) {
   return null;
 }
 
-module.exports = { Executor, findFolder, fmtDur };
+module.exports = { Executor, findFolder, fmtDur, findApp };

@@ -36,7 +36,7 @@ export function initSettings(root, ctx) {
       <div class="card"><h4>Faccina</h4><div class="facerow"><div id="face-s"></div><div>${sw('face.on', 'Mostra la faccina', s.face.on)}${sw('face.sleepy', 'Si addormenta se non la usi', s.face.sleepy)}</div></div>
         <p class="sub" style="margin-top:8px">Segue il mouse, sorride con la musica, ti avvisa quando Claude ti aspetta. Cliccala per farle una sorpresa.</p>
         <h4 style="margin-top:12px">Pillola chiusa</h4>${seg('compact', [['auto', 'Automatico'], ['clock', 'Orologio'], ['track', 'Musica'], ['none', 'Solo faccina']], s.compact)}
-        ${sw('clock24', 'Orologio a 24 ore', s.clock24)}${sw('seconds', 'Mostra i secondi', s.seconds)}</div>
+        ${sw('autostart', 'Avvia con Windows', s.autostart !== false)}${sw('clock24', 'Orologio a 24 ore', s.clock24)}${sw('seconds', 'Mostra i secondi', s.seconds)}</div>
       <div class="card"><h4>Schede visibili</h4><div class="checks">${TAB_LIST.map((t) => `<label class="chk"><input type="checkbox" data-tab="${t[0]}"${s.tabsOff.includes(t[0]) ? '' : ' checked'}><span>${t[1]}</span></label>`).join('')}</div>
         <p class="sub" style="margin-top:8px">I widget si scelgono e si riordinano dalla scheda Widget, con "Personalizza".</p></div>
       <div class="card"><h4>Assistente</h4>${sw('assistant.tts', 'Risponde a voce', s.assistant.tts)}${sw('assistant.claude', 'Passa a Claude Code quello che non capisce', s.assistant.claude)}

@@ -64,15 +64,18 @@ function setOpen(v) {
   if (open === v) return; open = v; island.classList.toggle('open', v); api.send('open-state', v);
   retarget(); onTab(); if (v) activity();
 }
-const keepOpen = () => dragging || (document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) || assistantState === 'listening';
-let leaveT;
+// l'isola resta aperta solo se stai davvero usando un campo di testo (finestra con il focus), trascinando o parlando
+const keepOpen = () => dragging || assistantState === 'listening' || (document.hasFocus() && !!document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName));
+let leaveT, mouseInside = false;
+function scheduleClose(delay) { clearTimeout(leaveT); leaveT = setTimeout(() => { if (mouseInside) return; if (keepOpen()) return scheduleClose(500); setOpen(false); }, delay); }
 api.on('hover', (inside) => {
-  clearTimeout(leaveT);
-  if (inside) { activity(); if (st.openOn === 'hover') setOpen(true); }
-  else leaveT = setTimeout(() => { if (!keepOpen()) setOpen(false); else if (open) leaveT = setTimeout(() => { if (!keepOpen()) setOpen(false); }, 1500); }, 380);
+  mouseInside = inside; clearTimeout(leaveT);
+  if (inside) { activity(); if (st.openOn === 'hover') setOpen(true); } else scheduleClose(380);
 });
+// cliccando fuori (la finestra perde il focus) si chiude anche se un campo di testo era attivo
+window.addEventListener('blur', () => { if (!mouseInside && open) scheduleClose(250); });
 island.addEventListener('mouseenter', () => { clearTimeout(leaveT); if (st && st.openOn === 'hover') setOpen(true); });
-island.addEventListener('click', () => { if (!open && st.openOn === 'click') setOpen(true); });
+island.addEventListener('click', () => { if (!open) setOpen(true); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (document.activeElement) document.activeElement.blur(); setOpen(false); } });
 api.on('toggle', () => setOpen(!open));
 function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 2600); }
